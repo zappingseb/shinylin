@@ -9,7 +9,15 @@
 
 library(shiny)
 library(ggplot2)
-library(lme4)
+if(!require("lme4")){
+  install.packages("lme4")
+  library(lme4)
+}
+if(!require("mcr")){
+  install.packages("mcr")
+  library(mcr)
+}
+
 library(stringr)
 rhandson_plugin = function(input,output){
   DF <- data.frame(Value = 1:10, Status = TRUE, Name = LETTERS[1:10],
