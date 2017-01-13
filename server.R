@@ -91,6 +91,14 @@ my_linear_plot = function(input,output){
       # Read the inputfile and plot the ggplot item
       data <- read.csv(input_file$datapath,
                        header=input$header_file1)
+      
+      if(!is.null(data)){
+        output$file1_table <- renderRHandsontable({
+          rhandsontable(data, stretchH = "all")
+        })
+      }
+      
+      
       if(all(colnames(data)==c("x","y"))){
         ggplot(data=data,aes(x=x,y=y))+
           geom_line(color="green")
@@ -115,6 +123,26 @@ my_linear_plot = function(input,output){
     out[,1]<-rownames(out)
     colnames(out)<-c("","value")
     out
+  })
+}
+
+render_by_textbox = function(input_data_reactive,
+                             header_info,
+                             row_info){
+  renderRHandsontable({
+    
+    if(row_info()){
+      row_names_bigText = 1
+    }else{
+      row_names_bigText = NULL
+    }
+    
+    if (!is.null(input_data_reactive()) && input_data_reactive()!=""){
+      DF <- read.table(
+        textConnection(input_data_reactive()),
+        sep="\t", header=header_info(), row.names = row_names_bigText)
+        rhandsontable(DF, stretchH = "all")
+    }
   })
 }
 
@@ -143,22 +171,23 @@ shinyServer(function(input, output) {
   # Check how Excel Input works
   # This function can be used to copy paste an Excel table into
   # an R data table
-  input_data_reactive <- reactive(input$bigText)
+  input_data_reactive_bigText <- reactive(input$bigText)
   
-  output$bigTextOut <- renderRHandsontable({
-    
-    if(input$row_bigText){
-      row_names_bigText = 1
-    }else{
-      row_names_bigText = NULL
-    }
-    
-    if (!is.null(input_data_reactive()) && input_data_reactive()!=""){
-      DF <- read.table(
-        textConnection(input_data_reactive()),
-        sep="\t", header=input$header_bigText, row.names = row_names_bigText)
-      rhandsontable(DF, stretchH = "all")
-    }
-  })
+  input_header_bigText <- reactive(input$header_bigText)
+  input_row_bigText <-reactive(input$row_bigText)
   
+  input_data_reactive_bigText2 <- reactive(input$bigText2)
+  input_header_bigText2 <- reactive(input$header_bigText2)
+  input_row_bigText2 <-reactive(input$row_bigText2)
+  
+  output$bigTextOut <- render_by_textbox(
+    input_data_reactive_bigText,input_header_bigText,input_row_bigText
+  )
+  output$bigTextOut2 <- render_by_textbox(
+    input_data_reactive_bigText2,input_header_bigText2,input_row_bigText2
+  )
+  
+  output$downloadData <- downloadHandler(filename="test_data.csv",content=function(file){
+    file.copy("./data/01_test_data.csv",file)},contentType="text/csv")
+
 })

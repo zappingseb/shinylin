@@ -1,4 +1,6 @@
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700");
+@import url("https://fonts.googleapis.com/css?family=Roboto:300italic,400italic,700italic,400,300,700");
+
 /*!
  * bootswatch v3.3.7
  * Homepage: http://bootswatch.com
@@ -28,12 +30,39 @@ body {
   font-family: "Open Sans";
   border-radius: 0;
 }
+.navbar h2{
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight:500;
+}
+/* Defining the Help Bar*/
+@keyframes fadeIn {
+    from { opacity: 0; }
+      to { opacity: 1; }
+}
+@-webkit-keyframes fadeIn {
+    from { opacity: 0; }
+      to { opacity: 1; }
+} 
+.helpbar{
+  width:100%;
+  padding-left:25px;
+  border-radius: 0;
+  margin-bottom:15px;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+  border-bottom:1px solid #eee;
+  display:none;
+  padding-bottom:15px;
+  padding-right:20px;
+}
+
 .container-fluid{
   padding:0;
   margin:0;
 }
 .leftspace{
   padding-left:5%;
+  border-right: 1px solid #eee;
 }
 
 /* Logo on top of the whole thing*/
@@ -42,7 +71,25 @@ body {
   width: 100%;
   height: 3px;
 }
-
+p{
+  text-align: justify;
+}
+a{
+  color:white;
+}
+a:hover{
+  text-decoration:none;
+  color:#2b5300;
+}
+p a:link{
+  color:#529f00;
+}
+p a:visited{
+  color:#2b5300;
+}
+p a:hover{
+  text-decoration:underline;
+}
 /* Create a Box for each of the two inputs*/
 .inputbox{
     border: 0;
@@ -78,4 +125,25 @@ body {
 /* Change the upload bar design*/
 .progress-bar{
   background-color: #529f00;
+}
+
+.collapse{display:none}
+
+/*Help Button design */
+#helpbutton{
+  background-color:#5fb900;
+  border: 0;
+  box-shadow:none;
+  color:white;
+}
+#helpbutton:hover{
+  background-color:#2b5300;
+}
+#helpbutton:focus{
+  border:0;
+  outline:none;
+}
+#helpbutton:active{
+  border:0;
+  outline:none;
 }

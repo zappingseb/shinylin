@@ -19,29 +19,45 @@ if(!require("rhandsontable")){
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(theme = "bootstrap.css",
                   
-                  
-  
-  # Application title
+#------------ Navigation Bar --------
   div(class="navbar",
       fluidRow(
-        column(10,titlePanel("Comparing Measurement Methods")),
-        column(2,br(),"sebastian",tags$b("wolf"),br(),div(id="line")))
+        column(5,titlePanel("Comparing Measurement Methods")),
+        column(5,h2(actionButton("helpbutton", "?"))),
+        column(2,br(),HTML("<a href='http://mail-wolf.de'>sebastian<b>wolf</b></a>"),br(),div(id="line")))
     
-      ),
+      ),#div
+#------------- Help Panel ----------
+    # A Help panel being activated on Click of the HELP Button
+    conditionalPanel(condition = "input.helpbutton % 2 != 0",
+                     class="helpbar",
+                     fluidRow(
+                       column(4,
+                              h4("Uploading Datasets to analyze"),
+                              br(),
+                              p("Please use this section to upload data. Therefore you have three
+                  possibilities including ",tags$b("Microsoft Excel® Copy & Paste,"),tags$b("CSV Upload")," and ",
+                                tags$b("Manually typing")," into a default table"),
+                              p("Data shall be provided in tables. Therefore a new line shall be added for each
+                  point of a dataset within the same method. These lines will be compared between
+                  methods. Columns shall be added if multiple datasets will be compared for linearity.
+                  Multiple columns are",tags$b("not"),"possible for the ",tags$b("Manually typing"),
+                                "data input."),
+                              p("A TestData.CSV file can be downloaded. Please use this File
+                  with the header checkbox 'checked'"),
+                              downloadButton('downloadData','test data')
+                              ),column(6,"")
+                     )
+                       
+      ),#conditional panel
   
-
-  
+#----------- LEFT SIDE -------------
   # Sidebar with the import functions and the old slider from
   # the example App
     fluidRow(
        column(4,
               class="leftspace",
-              h2("Uploading Datasets to analyze",align="center"),
-              br(),
-              p("Please use this section to upload data. Therefore you have three
-                possibilities including ",tags$b("Excel Copy&Paste,"),tags$b("CSV Upload")," and ",
-                tags$b("Manually typing")," into an empty table"),
-              br(),
+              h2("Uploading Datasets to analyze",align="left"),
               
               # Slider of the Example App
               sliderInput("bins",
@@ -51,7 +67,7 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                    value = 30),
               
 # --------- InputBox for the 1st Dataset ----------
-             p(h3("First dataset")), 
+             p(h3("First method datasets")), 
              div(class = "inputbox",
                   
                   selectInput("dataset",
@@ -82,6 +98,9 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                                )),
                         column(2,checkboxInput("header_file1", "Header", TRUE),
                         checkboxInput("row_file1","Row Names",F))
+                        ),#fluidRow
+                        fluidRow(
+                          column(11,rHandsontableOutput("file1_table"))
                         )#fluidRow
                     )
                   ),
@@ -101,10 +120,24 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                   )
           ),# div
 # --------- InputBox for the 2nd Dataset ----------
-        p(h3("Second dataset")),
-        div(class="inputbox",
+        p(h3("Second method datasets")),
+        div(class = "inputbox",
+            
             selectInput("dataset2",
-                        "Choose a method to upload your data set:",c("","Copy Paste", "CSV Upload", "rhandson")),
+                        "Choose a method to upload your data set:",
+                        c("","Copy Paste", "CSV Upload", "Manual Entry")),
+            
+            # Create an R handson Reader based on the tutorial on:
+            # https://github.com/jrowen/rhandsontable
+            conditionalPanel(
+              condition = "input.dataset2 == 'Manual Entry'",wellPanel(
+                fluidRow(column(3,
+                                actionButton("save2", "Save table")
+                ),
+                column(8,rHandsontableOutput("hot2"))
+                ))
+            ),
+            
             # Create an input file reader
             conditionalPanel(
               condition = "input.dataset2 == 'CSV Upload'",
@@ -116,10 +149,14 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                                             'text/comma-separated-values,text/plain', 
                                             '.csv')
                          )),
-                  column(2,checkboxInput("header2", "Header", TRUE)))
+                  column(2,checkboxInput("header_file2", "Header", TRUE),
+                         checkboxInput("row_file2","Row Names",F))
+                ),#fluidRow
+                fluidRow(
+                  column(11,rHandsontableOutput("file2_table"))
+                )#fluidRow
               )
             ),
-            # Copy Paste from Textarea to RHandsonTable
             conditionalPanel(
               condition = "input.dataset2 == 'Copy Paste'",
               # Provide a Text Area where tables can be copy pasted  
@@ -127,35 +164,37 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                 fluidRow(
                   column(8,textAreaInput(inputId="bigText2",
                                          "label"="Paste your Excel data into this field:")),
-                  column(2,checkboxInput(inputId="header_bigText2", "Header", TRUE),
-                         checkboxInput("row_bigText","Row Names",F))
+                  column(2,checkboxInput("header_bigText2", "Header", TRUE),
+                         checkboxInput("row_bigText2","Row Names",F))
                 ),
                 
                 rHandsontableOutput("bigTextOut2")
               )
             )
-            
-            )#div
+        )# div
                
     ),# column
+#----------- RIGHT SIDE -------------
 # --------- PlayGround Stuff ----------
     # Show a plot of the generated distribution
     column(6,
-       plotOutput("distPlot")
-    ),
-    column(4,
-      plotOutput("myplot")
-    ),
-    column(6,
-           h2("Here we can put some basic description"),
-           p("Auf jeden Fall muss hier etwas stehen über ",
-           a("Sebastian's Website",href="http://mail-wolf.de"),
-          "sonst ist das ja alles Quatsch."),
-          p("und einen zweiten Abschnitt brauchen wir, nur wegen cool und
-            weil so viel Text rein muss, dass es zweizeilig wird."),
-          tableOutput("linreg")
+           h2("Analysis",align="center"),br(),
+           p("In this section the results of the linearity analysis will be displayed. Please
+             feel free to use the checkboxes to display or hide certain analysis parts"),
+           tags$hr(),
+           
+       plotOutput("distPlot"),
+       plotOutput("myplot"),
+       h2("Here we can put some basic description"),
+       p("Auf jeden Fall muss hier etwas stehen über ",
+         a("Sebastian's Website",href="http://mail-wolf.de"),
+         "sonst ist das ja alles Quatsch."),
+       p("und einen zweiten Abschnitt brauchen wir, nur wegen cool und
+         weil so viel Text rein muss, dass es zweizeilig wird."),
+       tableOutput("linreg")
     ),
     column(2,
+           
            tableOutput('table')
            )
     
