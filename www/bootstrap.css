@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700");
+/*!
+ * bootswatch v3.3.7
+ * Homepage: http://bootswatch.com
+ * Copyright 2012-2016 Thomas Park
+ * Licensed under MIT
+ * Based on Bootstrap
+*/
+/*!
+ * Bootstrap v3.3.7 (http://getbootstrap.com)
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
+/*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
+html {
+  font-family: sans-serif;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+}
+.navbar{
+  background-color:#529f00;
+  color:white;
+  padding-left:25px;
+  padding-bottom:15px;
+  font-family: "Open Sans";
+  border-radius: 0;
+}
+.container-fluid{
+  padding:0;
+  margin:0;
+}
+.leftspace{
+  padding-left:5%;
+}
+
+/* Logo on top of the whole thing*/
+#line{    
+  background-color: #ffffff;
+  width: 100%;
+  height: 3px;
+}
+
+/* Create a Box for each of the two inputs*/
+.inputbox{
+    border: 0;
+    border-left-color: #529f00;
+    border-left-width: 3px;
+    border-left-style: solid;
+    margin-left: 10px;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    padding-left:10px;
+}
+
+/* Change the slider desing*/
+.irs-bar {
+    height: 8px;
+    top: 25px;
+    border-top: 1px solid #529f00;
+    border-bottom: 1px solid #529f00;
+    background: #529f00;
+}
+.irs-bar-edge {
+    border: 1px solid #529f00;
+    background: #529f00;
+}
+.irs-single{
+      background: #529f00;
+}
+/* Change the upload bar design*/
+.progress-bar{
+  background-color: #529f00;
+}

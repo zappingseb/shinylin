@@ -23,15 +23,18 @@ rhandson_plugin = function(input,output){
   DF <- data.frame(Value = 1:10, Status = TRUE, Name = LETTERS[1:10],
                    Date = seq(from = Sys.Date(), by = "days", length.out = 10),
                    stringsAsFactors = FALSE)
-  
+  # Read in all the reactive input from the server
   values <- reactiveValues()
   
-  ## Handsontable
+  ## Observe the DF (dataframe) value
+  # from the server
   observe({
     if (!is.null(input$hot)) {
+      # Get it as the input
       DF = hot_to_r(input$hot)
     } else {
       if (is.null(values[["DF"]]))
+        # Else get it from the DF variable
         DF <- DF
       else
         DF <- values[["DF"]]
@@ -39,6 +42,8 @@ rhandson_plugin = function(input,output){
     values[["DF"]] <- DF
   })
   
+  # Fill the RHandsonTable with the 
+  # Data from the dataframe
   output$hot <- renderRHandsontable({
     DF <- values[["DF"]]
     if (!is.null(DF))
@@ -46,6 +51,8 @@ rhandson_plugin = function(input,output){
   })
   
   ## Save 
+  # On click on the input Save button a "input_table.rds" file is written
+  # into the /data table
   observeEvent(input$save, {
     finalDF <- isolate(values[["DF"]])
     saveRDS(finalDF, file=file.path("./data", sprintf("%s.rds", "input_table")))
@@ -63,57 +70,38 @@ my_df = function(bins){
   return(data.frame(x,y))
 }
 
-shinyServer(function(input, output) {
-  
-  rhandson_plugin(input,output)
-  
-  # Example for responsive UI
-  datasetInput <- reactive({
-    switch(input$dataset,
-           "rock" = 1,
-           "pressure" = 2,
-           "cars" = 3)
-  })
-  
-  output$nrows <- reactive({
-    nrow(datasetInput())
-  })
-  # - - END OF EXAMPLE
-  
+my_linear_plot = function(input,output){
+  #' Function to render a linear plot of value pairs due to the
+  #' bins input string or a datafile
+  # Read in the
   response <- reactive(my_df(input$bins))
-   
-  output$distPlot <- renderPlot({
-    
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2] 
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    
-  })
   
   output$myplot <- renderPlot({
-
+    
     # Create a green line of the data frame
     # created with my_df and the number of bins
     # set in the input
+    
+    # In case there is an input file use this inputfile
     input_file <- input$file1
     
     if(is.null(input_file)){
       ggplot(data=response(),aes(x=x,y=y))+
         geom_line(color="green")
     }else{
+      
+      # Read the inputfile and plot the ggplot item
       data <- read.csv(input_file$datapath,header=input$header)
       if(all(colnames(data)==c("x","y"))){
         ggplot(data=data,aes(x=x,y=y))+
           geom_line(color="green")
       }
     }
-
+    
     
   })
   
+  # output the table of the readin in the "table" item of the ui
   output$table <- renderTable(
     response()
   )
@@ -129,19 +117,49 @@ shinyServer(function(input, output) {
     colnames(out)<-c("","value")
     out
   })
+}
+
+shinyServer(function(input, output) {
+  
+  # Run all functions needed for the Rhandson Table
+  rhandson_plugin(input,output)
+  
+  # Run a function to create a linear ggplot and table
+  my_linear_plot(input,output)
+  
+  # Standard Example for a responsive Histogram
+  output$distPlot <- renderPlot({
+    
+    # generate bins based on input$bins from ui.R
+    x    <- faithful[, 2] 
+    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+    
+    # draw the histogram with the specified number of bins
+    hist(x, breaks = bins, col = '#529f00', border = 'white')
+    
+  })
+  
+  
   
   # Check how Excel Input works
   # This function can be used to copy paste an Excel table into
   # an R data table
-  dataframe <- reactive(input$bigText)
+  input_data_reactive <- reactive(input$bigText)
   
-  output$bigTextOut <- renderTable({
-    if(dataframe()!=""){
-      x <- read.table(textConnection(dataframe()),header=T,sep = "\t")
+  output$bigTextOut <- renderRHandsontable({
+    
+    if(input$row_bigText){
+      row_names_bigText = 1
     }else{
-      x<-data.frame("")
+      row_names_bigText = NULL
     }
-
+    
+    if (!is.null(input_data_reactive()) && input_data_reactive()!=""){
+      DF <- read.table(
+        textConnection(input_data_reactive()),
+        sep="\t", header=input$header_bigText, row.names = row_names_bigText)
+      rhandsontable(DF, stretchH = "all")
+    }
   })
   
 })
