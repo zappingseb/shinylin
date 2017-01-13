@@ -45,9 +45,13 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                                 "data input."),
                               p("A TestData.CSV file can be downloaded. Please use this File
                   with the header checkbox 'checked'"),
-                              downloadButton('downloadData','test data')
-                              ),column(6,"")
-                     )
+                              fluidRow(
+                                column(6,downloadButton('downloadData','1st test data')),
+                                column(6,downloadButton('downloadData_two','2nd test data'))
+                              )
+                              
+                     )#column
+            )#fluidRow
                        
       ),#conditional panel
   
@@ -59,17 +63,12 @@ shinyUI(fluidPage(theme = "bootstrap.css",
               class="leftspace",
               h2("Uploading Datasets to analyze",align="left"),
               
-              # Slider of the Example App
-              sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30),
+              
               
 # --------- InputBox for the 1st Dataset ----------
              p(h3("First method datasets")), 
              div(class = "inputbox",
-                  
+                 textInput(inputId="dataset1_name",label="Name the Method",value = "Method 1"),
                   selectInput("dataset",
                               "Choose a method to upload your data set:",
                               c("","Copy Paste", "CSV Upload", "Manual Entry")),
@@ -78,10 +77,11 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                   # https://github.com/jrowen/rhandsontable
                   conditionalPanel(
                     condition = "input.dataset == 'Manual Entry'",wellPanel(
+                      p("Help can be found",a(href="https://github.com/jrowen/rhandsontable","here")),
                     fluidRow(column(3,
                                       actionButton("save", "Save table")
                                     ),
-                             column(8,rHandsontableOutput("hot"))
+                             column(8,rHandsontableOutput("hot",height = "200px"))
                     ))
                   ),
                   
@@ -122,7 +122,7 @@ shinyUI(fluidPage(theme = "bootstrap.css",
 # --------- InputBox for the 2nd Dataset ----------
         p(h3("Second method datasets")),
         div(class = "inputbox",
-            
+            textInput(inputId="dataset2_name",label="Name the Method",value = "Method 2"),
             selectInput("dataset2",
                         "Choose a method to upload your data set:",
                         c("","Copy Paste", "CSV Upload", "Manual Entry")),
@@ -130,7 +130,9 @@ shinyUI(fluidPage(theme = "bootstrap.css",
             # Create an R handson Reader based on the tutorial on:
             # https://github.com/jrowen/rhandsontable
             conditionalPanel(
-              condition = "input.dataset2 == 'Manual Entry'",wellPanel(
+              condition = "input.dataset2 == 'Manual Entry'",
+              wellPanel(
+                p("Help can be found",a(href="https://github.com/jrowen/rhandsontable","here")),
                 fluidRow(column(3,
                                 actionButton("save2", "Save table")
                 ),
@@ -179,6 +181,12 @@ shinyUI(fluidPage(theme = "bootstrap.css",
     # Show a plot of the generated distribution
     column(6,
            h2("Analysis",align="center"),br(),
+           # Slider of the Example App
+           sliderInput("bins",
+                       "Number of bins:",
+                       min = 1,
+                       max = 50,
+                       value = 30),
            p("In this section the results of the linearity analysis will be displayed. Please
              feel free to use the checkboxes to display or hide certain analysis parts"),
            tags$hr(),
