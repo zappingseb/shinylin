@@ -39,7 +39,7 @@ shinyUI(fluidPage(theme = "bootstrap.css",
               h2("Uploading Datasets to analyze",align="center"),
               br(),
               p("Please use this section to upload data. Therefore you have three
-                possibilities including ",tags$b("Excel Copy&Paste"),",",tags$b("CSV Upload")," and ",
+                possibilities including ",tags$b("Excel Copy&Paste,"),tags$b("CSV Upload")," and ",
                 tags$b("Manually typing")," into an empty table"),
               br(),
               
@@ -51,33 +51,22 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                    value = 30),
               
 # --------- InputBox for the 1st Dataset ----------
-              div(class = "inputbox",
+             p(h3("First dataset")), 
+             div(class = "inputbox",
                   
                   selectInput("dataset",
                               "Choose a method to upload your data set:",
-                              c("","Copy Paste", "CSV Upload", "rhandson")),
+                              c("","Copy Paste", "CSV Upload", "Manual Entry")),
                   
                   # Create an R handson Reader based on the tutorial on:
                   # https://github.com/jrowen/rhandsontable
                   conditionalPanel(
-                    condition = "input.dataset == 'rhandson'",
-                    fluidRow(column(4,
-                                    helpText("Shiny app based on an example given in the rhandsontable package.", 
-                                             "Right-click on the table to delete/insert rows.", 
-                                             "Double-click on a cell to edit"),
-                                    
-                                    wellPanel(
-                                      h3("Table options"),
-                                      radioButtons("useType", "Use Data Types", c("TRUE", "FALSE"))
-                                    ),
-                                    br(), 
-                                    
-                                    wellPanel(
-                                      h3("Save"), 
+                    condition = "input.dataset == 'Manual Entry'",wellPanel(
+                    fluidRow(column(3,
                                       actionButton("save", "Save table")
-                                    )),
+                                    ),
                              column(8,rHandsontableOutput("hot"))
-                    )
+                    ))
                   ),
                   
                   # Create an input file reader
@@ -91,7 +80,9 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                                                   'text/comma-separated-values,text/plain', 
                                                   '.csv')
                                )),
-                        column(2,checkboxInput("header", "Header", TRUE)))
+                        column(2,checkboxInput("header_file1", "Header", TRUE),
+                        checkboxInput("row_file1","Row Names",F))
+                        )#fluidRow
                     )
                   ),
                   conditionalPanel(
@@ -108,13 +99,45 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                       rHandsontableOutput("bigTextOut")
                     )
                   )
-                  )
+          ),# div
 # --------- InputBox for the 2nd Dataset ----------
-              
-              
-              
-              
-    ),
+        p(h3("Second dataset")),
+        div(class="inputbox",
+            selectInput("dataset2",
+                        "Choose a method to upload your data set:",c("","Copy Paste", "CSV Upload", "rhandson")),
+            # Create an input file reader
+            conditionalPanel(
+              condition = "input.dataset2 == 'CSV Upload'",
+              wellPanel(
+                fluidRow(
+                  column(8,
+                         fileInput('file2', 'Choose CSV File',
+                                   accept=c('text/csv', 
+                                            'text/comma-separated-values,text/plain', 
+                                            '.csv')
+                         )),
+                  column(2,checkboxInput("header2", "Header", TRUE)))
+              )
+            ),
+            # Copy Paste from Textarea to RHandsonTable
+            conditionalPanel(
+              condition = "input.dataset2 == 'Copy Paste'",
+              # Provide a Text Area where tables can be copy pasted  
+              wellPanel(
+                fluidRow(
+                  column(8,textAreaInput(inputId="bigText2",
+                                         "label"="Paste your Excel data into this field:")),
+                  column(2,checkboxInput(inputId="header_bigText2", "Header", TRUE),
+                         checkboxInput("row_bigText","Row Names",F))
+                ),
+                
+                rHandsontableOutput("bigTextOut2")
+              )
+            )
+            
+            )#div
+               
+    ),# column
 # --------- PlayGround Stuff ----------
     # Show a plot of the generated distribution
     column(6,
@@ -137,5 +160,6 @@ shinyUI(fluidPage(theme = "bootstrap.css",
            )
     
     
-  )
-))
+  )#fluidRow
+)#fluidPage
+)#shinyUI

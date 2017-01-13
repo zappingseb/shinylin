@@ -20,9 +20,7 @@ if(!require("mcr")){
 
 library(stringr)
 rhandson_plugin = function(input,output){
-  DF <- data.frame(Value = 1:10, Status = TRUE, Name = LETTERS[1:10],
-                   Date = seq(from = Sys.Date(), by = "days", length.out = 10),
-                   stringsAsFactors = FALSE)
+  DF <- data.frame(Value = 1:3)
   # Read in all the reactive input from the server
   values <- reactiveValues()
   
@@ -47,7 +45,7 @@ rhandson_plugin = function(input,output){
   output$hot <- renderRHandsontable({
     DF <- values[["DF"]]
     if (!is.null(DF))
-      rhandsontable(DF, useTypes = as.logical(input$useType), stretchH = "all")
+      rhandsontable(DF, stretchH = "all")
   })
   
   ## Save 
@@ -91,7 +89,8 @@ my_linear_plot = function(input,output){
     }else{
       
       # Read the inputfile and plot the ggplot item
-      data <- read.csv(input_file$datapath,header=input$header)
+      data <- read.csv(input_file$datapath,
+                       header=input$header_file1)
       if(all(colnames(data)==c("x","y"))){
         ggplot(data=data,aes(x=x,y=y))+
           geom_line(color="green")
