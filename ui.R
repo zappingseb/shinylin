@@ -22,11 +22,17 @@ shinyUI(fluidPage(theme = "bootstrap.css",
 #------------ Navigation Bar --------
   div(class="navbar",
       fluidRow(
-        column(5,titlePanel("Comparing Measurement Methods")),
-        column(5,h2(actionButton("helpbutton", "?"))),
+        column(1,h2(actionButton("helpbutton", "Help"))),
+        column(9,titlePanel("Comparing Measurement Methods")),
         column(2,br(),HTML("<a href='http://mail-wolf.de'>sebastian<b>wolf</b></a>"),br(),div(id="line")))
     
       ),#div
+  conditionalPanel(condition="output.error_message!=''",
+      div(class="error_window"
+          ,p(tags$b("Error:")),
+          textOutput("error_message")
+          )#div
+      ),#conditionalPanel
 #------------- Help Panel ----------
     # A Help panel being activated on Click of the HELP Button
     conditionalPanel(condition = "input.helpbutton % 2 != 0",
@@ -181,29 +187,27 @@ shinyUI(fluidPage(theme = "bootstrap.css",
 #----------- RIGHT SIDE -------------
 # --------- PlayGround Stuff ----------
     # Show a plot of the generated distribution
-    column(6,
-           h2("Analysis",align="center"),br(),
-           fluidRow(column(5,textOutput("error_message"))),
+    column(7,
+           h2("Analysis",align="center"),
+           p(h3(HTML("&nbsp;"))),
+           # Create an input field for the visualization which allows the user to set certain properties
+           # and maybe leave certain things out
+           div(class="inputbox",
+               fluidRow(
+                 column(4,selectInput("method_for_regression",label="Choose a Regression method to be plotted",c("Linear Regression",
+                                                                                                      "Deming Regression",
+                                                                                                      "Passing-Bablok regression"))),
+                 column(2,checkboxInput("confidence_intervals","Show Confidence intervals",T)),
+                 downloadButton('download_analysis', 'Download Analysis table')
+               )#fluidRow
+              ),#div
+           br(),
+           
 
-           p("In this section the results of the linearity analysis will be displayed. Please
-             feel free to use the checkboxes to display or hide certain analysis parts"),
-           tags$hr(),
-           
-         plotOutput("myplot"),
-       
-       
-       h2("Here we can put some basic description"),
-       p("Auf jeden Fall muss hier etwas stehen über ",
-         a("Sebastian's Website",href="http://mail-wolf.de"),
-         "sonst ist das ja alles Quatsch."),
-       p("und einen zweiten Abschnitt brauchen wir, nur wegen cool und
-         weil so viel Text rein muss, dass es zweizeilig wird."),
-       tableOutput("linreg")
-    ),
-    column(2,
-           
-           tableOutput('table')
-           )
+           plotOutput("myplot"),
+
+           tableOutput("linreg")
+    )
     
     
   )#fluidRow

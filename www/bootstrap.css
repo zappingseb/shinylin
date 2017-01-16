@@ -107,6 +107,21 @@ p a:hover{
 .well{
     margin-right: 10px
 }
+
+/* Create an error window */
+.error_window{
+  position:fixed;
+  top:10px;
+  right:10px;
+  background-color: #FF6666;
+  padding:10px;
+    z-index: 1000;
+    border-radius: 5px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+    border: 1px solid #3f3f3f;
+    min-width:200px;
+    max-width:30%;
+}
 /* Change the slider desing*/
 .irs-bar {
     height: 8px;
