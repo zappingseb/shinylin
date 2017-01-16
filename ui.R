@@ -8,11 +8,11 @@
 #
 
 if(!require("shiny")){
-  install.packages("shiny")
+  #install.packages("shiny")
   library(shiny)
 }
 if(!require("rhandsontable")){
-  install.packages("rhandsontable")
+  #install.packages("rhandsontable")
   library(rhandsontable)
 }
 

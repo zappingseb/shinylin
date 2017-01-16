@@ -10,23 +10,23 @@
 library(shiny)
 library(ggplot2)
 if(!require("lme4")){
-  install.packages("lme4")
+  #install.packages("lme4")
   library(lme4)
 }
 if(!require("mcr")){
-  install.packages("mcr")
+  #install.packages("mcr")
   library(mcr)
 }
 if(!require("grid")){
-  install.packages("grid")
+  #install.packages("grid")
   library(grid)
 }
 if(!require("gridExtra")){
-  install.packages("gridExtra")
+  #install.packages("gridExtra")
   library(gridExtra)
 }
 if(!require("stringr")){
-  install.packages("stringr")
+  #install.packages("stringr")
   library(stringr)
 }
 
