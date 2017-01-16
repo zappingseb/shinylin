@@ -141,61 +141,51 @@ row_tester = function(row_info){
   }
 }
 
-my_linear_plot = function(input,output){
-  #' Function to render a linear plot of value pairs due to the
-  #' bins input string or a datafile
-  # Read in the
-  response <- reactive(my_df(input$bins))
-  
+my_linear_plot = function(values,output){
+  the_data<-NULL
+
+  output$error_message <- renderText({
+    if(!is.null(values[["DF"]]) && !is.null(values[["DF2"]])){
+      
+      if(dim(values[["DF"]])[1] == dim(values[["DF2"]])[1]){
+        the_data <- data.frame(x=values[["DF"]],y=values[["DF2"]])
+        colnames(the_data) <- c("x","y")
+        print(the_data)
+        plotit(the_data,output)
+        ""
+        
+      }else{
+        "Please provide two tables with the same length"
+      }
+    }
+  })
+
+  # Rende a output table including the generation of a linear model
+  # output$linreg <- renderTable({
+  #   if(length(the_data)>0){
+  #     input_df <- the_data
+  #     model = lm(y ~ x,input_df)
+  #     out<- data.frame(model$coefficients)
+  #     rownames(out)<-c("intercept","slope")
+  #     out[,2]<-out[,1]
+  #     out[,1]<-rownames(out)
+  #     colnames(out)<-c("","value")
+  #     out
+  #   }
+  # })
+}
+
+plotit = function(the_data,output){
   output$myplot <- renderPlot({
-    
     # Create a green line of the data frame
     # created with my_df and the number of bins
     # set in the input
-    
-    # In case there is an input file use this inputfile
-    input_file <- input$file1
-    
-    if(is.null(input_file)){
-      ggplot(data=response(),aes(x=x,y=y))+
-        geom_line(color="green")
-    }else{
-      
-      row_nums <- row_tester(input$row_file1)
-      
-      # Read the inputfile and plot the ggplot item
-      data <- read.csv(input_file$datapath,
-                       header=input$header_file1,
-                       row.names=row_nums 
-                       )
-      
-      
-      
-      
-      if(all(colnames(data)==c("x","y"))){
-        ggplot(data=data,aes(x=x,y=y))+
-          geom_line(color="green")
-      }
+    print(the_data)
+    if(!is.null(the_data)){
+      ggplot(data=the_data,aes(x=x,y=y))+
+        geom_point(color="green",size=12)
     }
     
-    
-  })
-  
-  # output the table of the readin in the "table" item of the ui
-  output$table <- renderTable(
-    response()
-  )
-  
-  # Rende a output table including the generation of a linear model
-  output$linreg <- renderTable({
-    input_df <- response()
-    model = lm(y ~ x,input_df)
-    out<- data.frame(model$coefficients)
-    rownames(out)<-c("intercept","slope")
-    out[,2]<-out[,1]
-    out[,1]<-rownames(out)
-    colnames(out)<-c("","value")
-    out
   })
 }
 
@@ -253,16 +243,81 @@ render_by_textbox = function(input_data_reactive,
   })
 }
 
-
+input_finder = function(input,output,values){
+  
+  # Get The value of the input DropDown Field
+  # for the first input
+  dataset1 <- reactive(input$dataset)
+  dataset2 <- reactive(input$dataset2)
+  
+  # Fill the values table with the data
+  # from the right data.frame based on
+  # the dropdown filed
+  observe({
+    if(dataset1() == "Copy Paste"){
+      # In case of choosing copy paste take
+      # the copy paste data frame
+      if(!is.null(input$bigTextOut)){
+        if(length(input$bigTextOut$data)>0){
+          values[["DF"]] <- tryCatch(hot_to_r(input$bigTextOut),error=c())
+        }
+      }
+    }else if(dataset1() == "Manually Typing"){
+      # In case manually typing was chosen use
+      # the "hot" data.frame
+      if(!is.null(input$hot)){
+        if(length(input$hot$data)>0){
+          values[["DF"]] <- tryCatch(hot_to_r(input$hot),error=c())
+        }
+      }
+    }else if(dataset1() == "CSV Upload"){
+      # In case of the File Upload use the
+      # CSV upload table
+      if(!is.null(input$file1_table)){
+        if(length(input$file1_table$data)>0){
+          values[["DF"]] <- tryCatch(hot_to_r(input$file1_table),error=c())
+        }
+      }
+    }
+  })
+  
+  observe({
+    if(dataset2() == "Copy Paste"){
+      # In case of choosing copy paste take
+      # the copy paste data frame
+      if(!is.null(input$bigTextOut2)){
+        if(length(input$bigTextOut2$data)>0){
+          values[["DF2"]] <- tryCatch(hot_to_r(input$bigTextOut2),error=c())
+        }
+      }
+    }else if(dataset2() == "Manually Typing"){
+      # In case manually typing was chosen use
+      # the "hot" data.frame
+      if(!is.null(input$hot2)){
+        if(length(input$hot2$data)>0){
+          values[["DF2"]] <- tryCatch(hot_to_r(input$hot2),error=c())
+        }
+      }
+    }else if(dataset2() == "CSV Upload"){
+      # In case of the File Upload use the
+      # CSV upload table
+      if(!is.null(input$file2_table)){
+        if(length(input$file2_table$data)>0){
+          values[["DF2"]] <- tryCatch(hot_to_r(input$file2_table),error=c())
+        }
+      }
+    }
+  })
+}
 
 shinyServer(function(input, output) {
-  
+
   # Run all functions needed for the Rhandson Table
   # Manually input management
   manually_input(input,output)
   
   # Run a function to create a linear ggplot and table
-  my_linear_plot(input,output)
+ 
   
   # Handle file inputs in the file_input function
   file_input(input,output)
@@ -270,6 +325,12 @@ shinyServer(function(input, output) {
   # Handle everything in context with the copy paste
   # handlers
   text_paste_input(input,output)
+  
+  # Try handling the inputs
+  values_to_treat <- reactiveValues()
+  input_finder(input,output,values_to_treat)
+  my_linear_plot(values_to_treat,
+                 output)
   
   # Standard Example for a responsive Histogram
   output$distPlot <- renderPlot({

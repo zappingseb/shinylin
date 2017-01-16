@@ -43,8 +43,8 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                   methods. Columns shall be added if multiple datasets will be compared for linearity.
                   Multiple columns are",tags$b("not"),"possible for the ",tags$b("Manually typing"),
                                 "data input."),
-                              p("A TestData.CSV file can be downloaded. Please use this File
-                  with the header checkbox 'checked'"),
+                              p("Two testdata CSV files can be downloaded. Please use these files
+                  with the header checkbox 'checked' in each of the two sections below."),
                               fluidRow(
                                 column(6,downloadButton('downloadData','1st test data')),
                                 column(6,downloadButton('downloadData_two','2nd test data'))
@@ -71,18 +71,19 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                  textInput(inputId="dataset1_name",label="Name the Method",value = "Method 1"),
                   selectInput("dataset",
                               "Choose a method to upload your data set:",
-                              c("","Copy Paste", "CSV Upload", "Manual Entry")),
+                              c("","Copy Paste", "CSV Upload", "Manually Typing")),
                   
                   # Create an R handson Reader based on the tutorial on:
                   # https://github.com/jrowen/rhandsontable
                   conditionalPanel(
-                    condition = "input.dataset == 'Manual Entry'",wellPanel(
-                      p("Help can be found",a(href="https://github.com/jrowen/rhandsontable","here")),
-                    fluidRow(column(3,
+                    condition = "input.dataset == 'Manually Typing'",wellPanel(
+                      fluidRow(column(4,
                                       actionButton("save", "Save table")
                                     ),
-                             column(8,rHandsontableOutput("hot",height = "200px"))
-                    ))
+                             column(7,rHandsontableOutput("hot",height = "200px"))
+                    )),
+                    p("Help can be found",a(href="https://github.com/jrowen/rhandsontable","here"))
+                    
                   ),
                   
                   # Create an input file reader
@@ -125,19 +126,20 @@ shinyUI(fluidPage(theme = "bootstrap.css",
             textInput(inputId="dataset2_name",label="Name the Method",value = "Method 2"),
             selectInput("dataset2",
                         "Choose a method to upload your data set:",
-                        c("","Copy Paste", "CSV Upload", "Manual Entry")),
+                        c("","Copy Paste", "CSV Upload", "Manually Typing")),
             
             # Create an R handson Reader based on the tutorial on:
             # https://github.com/jrowen/rhandsontable
             conditionalPanel(
-              condition = "input.dataset2 == 'Manual Entry'",
+              condition = "input.dataset2 == 'Manually Typing'",
               wellPanel(
-                p("Help can be found",a(href="https://github.com/jrowen/rhandsontable","here")),
-                fluidRow(column(3,
+               
+                fluidRow(column(4,
                                 actionButton("save2", "Save table")
                 ),
-                column(8,rHandsontableOutput("hot2"))
-                ))
+                column(7,rHandsontableOutput("hot2"))
+                )),
+                p("Help can be found",a(href="https://github.com/jrowen/rhandsontable","here"))
             ),
             
             # Create an input file reader
@@ -181,18 +183,15 @@ shinyUI(fluidPage(theme = "bootstrap.css",
     # Show a plot of the generated distribution
     column(6,
            h2("Analysis",align="center"),br(),
-           # Slider of the Example App
-           sliderInput("bins",
-                       "Number of bins:",
-                       min = 1,
-                       max = 50,
-                       value = 30),
+           fluidRow(column(5,textOutput("error_message"))),
+
            p("In this section the results of the linearity analysis will be displayed. Please
              feel free to use the checkboxes to display or hide certain analysis parts"),
            tags$hr(),
            
-       plotOutput("distPlot"),
-       plotOutput("myplot"),
+         plotOutput("myplot"),
+       
+       
        h2("Here we can put some basic description"),
        p("Auf jeden Fall muss hier etwas stehen über ",
          a("Sebastian's Website",href="http://mail-wolf.de"),
