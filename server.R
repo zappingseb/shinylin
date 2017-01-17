@@ -164,9 +164,12 @@ analysis_generate = function(values,
                           fieldnames,
                           analysis_fields,
                           output){
-  
+  # generate an empty dataset
   the_data<-NULL
 
+  # Use the renderText function to render the error_message UI 
+  # part. In case of any error it will be brought to the
+  # error message window
   output$error_message <- renderText({
     
     if(!is.null(values[["DF"]]) && !is.null(values[["DF2"]])){
@@ -224,8 +227,7 @@ analysis_generate = function(values,
             all_plots[[column_number]] <- plot_linreg(the_data,
                                                       fieldnames,
                                                       title_of_plot,
-                                                      render_confidence_intervals,
-                                                      output)
+                                                      render_confidence_intervals)
             
           }else if(error_counter>0){
             return("Please make sure you have the same number of experiments for each dataset")
@@ -294,14 +296,25 @@ data_construct = function(values,column_number){
   colnames(the_data) <- c("x","y")
   return(the_data[!is.na(the_data[,1]),])
 }
+
 data_add_regression = function(the_data,
                                mcreg_model){
   #' Append regression data to measurement data
   #' 
-  #' Due to the selection made for the method
-  #' parameter take the slope and intercept
-  #' of the regression and append data to later
-  #' plot a line
+  #' The mcreg_model is taken to calculate the regression
+  #' line going through the data and the confidence
+  #' interval. Both can be done with the calcResponse
+  #' function. The result is appended to the data by
+  #' labeling the "valuetype" column with "regression", "UCI"
+  #' and "LCI".
+  #' @param the_data (data.frame) A Datframe with the columns
+  #' x, y carrying the measurement data
+  #' @param mcreg_model (MCResult) A result of an mcr regression
+  #' calculated by the mcreg function
+  #' @return the_data (data.frame) A data frame carrying
+  #' the measurement data, regression data and
+  #' confidence interval data. 
+  #' @seealso calcResponse, mcreg
   # Calculate the distance between max and min of x-axis
   
   # Append the new column valuetype to the
@@ -362,14 +375,34 @@ plot_empty = function(){
 plot_linreg = function(the_data,
                        method_names,
                        title_of_plot="",
-                       confidence_intervals = F,
-                       output){
+                       confidence_intervals = F){
+  #' Plotting a linear regression plot in 1:1 ratio format
+  #' 
+  #' This function plots round circles with measured values and a grey
+  #' dashed line in between for the linear regression.
+  #' 
+  #' @param the_data (data.frame) A dataframe with the columns
+  #' x, y and valuetype where valuetype can be "measure", "regression"
+  #' "UCI" or "LCI". 
+  #' @param method_names (list) A list of two reactive elements represending
+  #' input boxes giving the names of the x-axis [[1]] and y-axis [[2]]
+  #' @param title_of_plot (string) A string giving the for the plot if it is
+  #' provided
+  #' @param confidence_intervals (bool) If the confidence_interval is set to TRUE
+  #' a grey area from the data columns "UCI" and "LCI" will be plotted around
+  #' the linear regression line.
+  #' @return a grob object carrying the plot
   return({
     # Create a green line of the data frame
     # created with my_df and the number of bins
     # set in the input
     if(!is.null(the_data) && dim(the_data)[1]>=1){
       
+      # If the confidence-intervals value is true then
+      # A confidence interval data set is created
+      #
+      # Therefore A table with 3 columns x,y.UCI,y.LCI is
+      # constructed and plotted as a grey are
       if(confidence_intervals){
         data_merged <-  merge(subset(the_data,valuetype=="UCI",select=c(1,2)),
                         subset(the_data,valuetype=="LCI",select=c(1,2)),
@@ -379,7 +412,10 @@ plot_linreg = function(the_data,
                                  aes(x=x, ymax=y.UCI, ymin=y.LCI), fill="#D3D3D3", alpha=0.65)
         data_for_ratio <- the_data
       }else{
+        # Else an empty element is used
         plot_conf <- element_blank()
+        # The data to calculate the aspect ratio of the plot
+        # is reduced to the regression data
         data_for_ratio <- subset(the_data,valuetype=="regression")
       }
       
@@ -421,6 +457,11 @@ plot_linreg = function(the_data,
   })
 }
 regression_map_methods = function(method_string){
+  #' Map the long method string to the
+  #' short names delivered by mcr package
+  #' 
+  #' @seealso mcreg
+
   if(method_string=="Linear Regression"){
     return("LinReg")
   }else if(method_string=="Deming Regression"){
@@ -540,7 +581,7 @@ regression_calc = function(input_dataframe, method="LinReg"){
   #' where the linear model y~x is calculated with the mcreg function of
   #' the mcr toolbox
   #' @seealso mcreg
-  #' @return out (list) 
+  #' @return out (list) with two elements
   #' 1) A Matrix containing the MCResult.getCoefficients result
   #' of the Regression calculation
   #' 2) the MCreg result itself

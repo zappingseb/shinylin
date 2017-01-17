@@ -1,0 +1,3 @@
+docker run -di -p 3838:3838 --name=shinyserver -v /home/wolf/shiny_docker/shinyapps/:/srv/shiny-server/     -v /home/wolf/shiny_docker/shinylog/:/var/log/ -v /home/wolf/shiny_docker/shinyconf/:/etc/shiny-server/ --privileged=true shiny_docker_sw
+
+https://hub.docker.com/r/gmgall/shiny-server/
