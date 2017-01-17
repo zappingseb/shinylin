@@ -43,7 +43,7 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                               br(),
                               p("Please use this section to upload data. Therefore you have three
                   possibilities including ",tags$b("Microsoft Excel® Copy & Paste,"),tags$b("CSV Upload")," and ",
-                                tags$b("Manually typing")," into a default table"),
+                                tags$b("Manually typing")," into a default table."),
                               p("Data shall be provided in tables. Therefore a new line shall be added for each
                   point of a dataset within the same method. These lines will be compared between
                   methods. Columns shall be added if multiple datasets will be compared for linearity.
@@ -56,7 +56,25 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                                 column(6,downloadButton('downloadData_two','2nd test data'))
                               )
                               
-                     )#column
+                     ),#column
+                     column(7,
+                           h4("Analysis"),
+                           br(),
+                           p("On top of this section you will find a bar that allows you to have certain
+                             settings for the analysis."),
+                           p(tags$b("Regression Method:"),"In this dropdown field you can choose the regression
+                             method outcome that shall be used for plotting the results. Three different
+                             regression methods are offered here. For further information on these regression
+                             methods we would recommend you the",
+                             a("Wikipedia article",href="https://en.wikipedia.org/wiki/Linear_regression"),"."),
+                           p(tags$b("Confidence Intervals:"),"Regression sometimes cannot fit you data
+                             perfectly as it will not be perfectly linearly correllated. Therefore the error
+                             of the regression can be displayed as a 2% confidence interval with this checkbox."),
+                           p("For using the slope and the intercept of each regression analysis we provide you
+                             with the values in a table format. The table displayed on the buttom of the analysis
+                             will be exported as a CSV file by clicking the",tags$b("Download Analysis table button."))
+                           
+                    )#column
             )#fluidRow
                        
       ),#conditional panel

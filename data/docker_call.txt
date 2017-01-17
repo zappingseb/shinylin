@@ -1,0 +1,4 @@
+docker run -di -p 3838:3838 --name=shinyserver -v /home/wolf/shiny_docker/shinyapps/:/srv/shiny-server/     -v /home/wolf/shiny_docker/shinylog/:/var/log/shiny-server -v /home/wolf/shiny_docker/shinyconf/:/etc/shiny-server/  shiny_server_sw_2
+
+#chcon -Rt svirt_sandbox_file_t /shinyapps
+#chcon -Rt svirt_sandbox_file_t /shinylog

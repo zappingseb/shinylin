@@ -1,28 +1,90 @@
-FROM r-base:latest
+FROM ubuntu:trusty
 
-MAINTAINER Winston Chang "winston@rstudio.com"
+MAINTAINER Guilherme Gall <gmgall@gmail.com>
 
-RUN apt-get update && apt-get install -y -t unstable \
-    sudo \
+# Fetching the key that signs the CRAN packages
+# Reference: http://cran.rstudio.com/bin/linux/ubuntu/README.html
+RUN gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9
+RUN gpg -a --export E084DAB9 | sudo apt-key add -
+
+# Fetching the key that signs the Webupd8 Oracle Java packages
+# Reference: http://www.webupd8.org/2014/03/how-to-install-oracle-java-8-in-debian.html
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
+
+# Adding Fiocruz repository
+RUN /bin/echo -e '\n## Fiocruz CRAN repository\ndeb http://cran.fiocruz.br/bin/linux/ubuntu trusty/' >> /etc/apt/sources.list
+
+# Adding Webupd8 repository
+RUN /bin/echo -e 'deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main\ndeb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main' >> /etc/apt/sources.list.d/webupd8team-java.list
+
+# Accepting Java license
+RUN /bin/echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | /usr/bin/debconf-set-selections
+
+RUN apt-get update && apt-get install -y \
+    r-base \
+    wget \
     gdebi-core \
-    pandoc \
-    pandoc-citeproc \
+    subversion \
+    libgdal-dev \
+    libproj-dev \
+    language-pack-pt-base \
     libcurl4-gnutls-dev \
-    libcairo2-dev/unstable \
-    libxt-dev \
-    git
+    oracle-java8-installer \
+    libv8-dev
 
-# Download and install shiny server
-RUN wget --no-verbose https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/VERSION -O "version.txt" && \
-    VERSION=$(cat version.txt)  && \
-    wget --no-verbose "https://s3.amazonaws.com/rstudio-shiny-server-os-build/ubuntu-12.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
-    gdebi -n ss-latest.deb && \
-    rm -f version.txt ss-latest.deb && \
-    R -e "install.packages(c('shiny', 'rmarkdown','ggplot2','stringr','dplyr','mcr','lme4','grid','gridExtra'), repos='https://cran.rstudio.com/')" && \
-    cp -R /usr/local/lib/R/site-library/shiny/examples/* /srv/shiny-server/
+# XXX Why javareconf needs to be used 2 times?
+RUN R CMD javareconf
+
+# Install R packages
+RUN R -e "install.packages('shiny', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('rmarkdown', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('rjson', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('maps', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('raster', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('dismo', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('shinythemes', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('rgdal', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('devtools', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('rgbif', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('shinydashboard', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('randomForest', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('kernlab', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('rJava', repos='http://cran.rstudio.com/')" && \
+    R -e "options(repos='http://cran.rstudio.com/'); devtools::install_github('rstudio/leaflet')" && \
+    R -e "install.packages('lme4', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('data.table', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('ggplot2', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('dplyr', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('gridExtra', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('stringr', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('rhandsontable', repos='http://cran.rstudio.com/')" && \
+    R -e "install.packages('mcr', repos='http://cran.rstudio.com/')"
+
+# Configuring R to use installed Oracle Java
+RUN R CMD javareconf
+
+# Download and install Shiny Server
+WORKDIR /tmp/
+RUN wget http://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.3.0.403-amd64.deb && \
+    gdebi -n shiny-server-1.3.0.403-amd64.deb && \
+    rm shiny-server-1.3.0.403-amd64.deb
 
 EXPOSE 3838
 
-COPY shiny-server.sh /usr/bin/shiny-server.sh
+ENV LANG pt_BR.UTF-8
 
-CMD ["/usr/bin/shiny-server.sh"]
+# shiny user is created by the Shiny Server package installed above
+
+# Default shiny UID and GID
+ENV SHINYUID 999
+ENV SHINYGID 999
+
+# Change the UID/GID of shiny user/group, ownership of files and start
+# shiny-server
+CMD bash -lc '\
+    groupmod -g $SHINYGID shiny && \
+    usermod -u $SHINYUID shiny && \
+    chown -R $SHINYUID:$SHINYGID /home/shiny && \
+    chown -R $SHINYUID:$SHINYGID /var/log/shiny-server && \
+    chown -R $SHINYUID:$SHINYGID /srv/shiny-server && \
+    shiny-server'
