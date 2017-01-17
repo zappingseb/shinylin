@@ -9,6 +9,7 @@
 
 library(shiny)
 library(ggplot2)
+library(data.table)
 if(!require("lme4")){
   #install.packages("lme4")
   library(lme4)
@@ -202,6 +203,11 @@ analysis_generate = function(values,
             # Generate the linear regression for the data and append the 
             # pretty output to the list of all outputs
             method <- analysis_fields[["method_for_regression"]]()
+            if(method=="Passing-Bablok regression"){
+                render_confidence_intervals <- F
+            }else{
+                render_confidence_intervals <- analysis_fields[["confidence_intervals"]]()
+            }
             
             regression_result <- regression_construct_table(the_data,method_to_choose = method)
             
@@ -218,7 +224,7 @@ analysis_generate = function(values,
             all_plots[[column_number]] <- plot_linreg(the_data,
                                                       fieldnames,
                                                       title_of_plot,
-                                                      analysis_fields[["confidence_intervals"]](),
+                                                      render_confidence_intervals,
                                                       output)
             
           }else if(error_counter>0){
@@ -235,8 +241,21 @@ analysis_generate = function(values,
         }
         
         
-        saveRDS(regression_combine_pretty(all_tables,all_titels), file=file.path("./data", sprintf("%s.rds", "output_table")))
-        output$linreg <- renderTable({regression_combine_pretty(all_tables,all_titels)},include.rownames=T,digits=4)
+        
+        
+        data_out <- data.table(regression_combine_pretty(all_tables,all_titels))
+        colnames(data_out)<- c('Linear regression Intercept',
+                                              'Linear regression Slope',
+                                              'Deming regression Intercept',
+                                              'Deming regression Slope',
+                                              'Passing-Bablok regression Intercept',
+                                              'Passing-Bablik regression slope',
+                                              'Pearsson R2')         
+        saveRDS(data_out,
+                file=file.path("./data", sprintf("%s.rds", "output_table")))
+        output$linreg <- renderTable({data_out},
+                                     include.rownames=T,
+                                     digits=4 )
         
         tryCatch({output$myplot <- renderPlot({
           grid.arrange(grobs = all_plots,ncol=3)
@@ -406,7 +425,7 @@ regression_map_methods = function(method_string){
     return("LinReg")
   }else if(method_string=="Deming Regression"){
     return("Deming")
-  }else if(method_string=="Passing-Bablok Regression"){
+  }else if(method_string=="Passing-Bablok regression"){
     return("PaBaLarge")
   }else{
     return("LinReg")
@@ -431,7 +450,6 @@ regression_construct_table =function(the_data,
   #' @seealso regression_calc, regression_pretty_output
   
   method_to_choose = regression_map_methods(method_to_choose)
-
   counter <- 0
   for(method in names_of_regressions){
     # Read the output of the mcr regression analysis for the method
