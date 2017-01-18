@@ -72,7 +72,8 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                              a("Wikipedia article",href="https://en.wikipedia.org/wiki/Linear_regression"),"."),
                            p(tags$b("Confidence Intervals:"),"Regression sometimes cannot fit you data
                              perfectly as it will not be perfectly linearly correllated. Therefore the error
-                             of the regression can be displayed as a 2% confidence interval with this checkbox."),
+                             of the regression can be displayed as a 2% confidence interval with this checkbox.
+                             Due to the computational intensity this could take upto 15 seconds"),
                            p("For using the slope and the intercept of each regression analysis we provide you
                              with the values in a table format. The table displayed on the buttom of the analysis
                              will be exported as a CSV file by clicking the",tags$b("Download Analysis table button."))
