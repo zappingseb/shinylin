@@ -796,10 +796,10 @@ shinyServer(function(input, output) {
                  output)
   
   
-  output$downloadData <- downloadHandler(filename="test_data1.csv",content=function(file){
-    file.copy("./data/01_test_data.csv",file)},contentType="text/csv")
-  output$downloadData_two <- downloadHandler(filename="test_data2.csv",content=function(file){
-    file.copy("./data/02_test_data.csv",file)},contentType="text/csv")
+  output$downloadData <- downloadHandler(filename="test_data1_ITA.csv",content=function(file){
+    file.copy("./data/ITA_data.csv",file)},contentType="text/csv")
+  output$downloadData_two <- downloadHandler(filename="test_data2_LCMS.csv",content=function(file){
+    file.copy("./data/LCMSMS_data.csv",file)},contentType="text/csv")
   outputOptions(output, "error_message", suspendWhenHidden = FALSE)
   
   # Make it possible to download the output_rds file as a CSV

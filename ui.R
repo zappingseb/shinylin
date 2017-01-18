@@ -49,7 +49,10 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                   methods. Columns shall be added if multiple datasets will be compared for linearity.
                   Multiple columns are",tags$b("not"),"possible for the ",tags$b("Manually typing"),
                                 "data input."),
-                              p("Two testdata CSV files can be downloaded. Please use these files
+                              p("Two testdata CSV files can be downloaded. These are generated
+                   with data from this",a(href="http://pubs.acs.org/doi/abs/10.1021/pr5011179","paper."),
+                  "These compare  immunoturbidimetric analysis (ITA) on a Cobas Integra 800 with an
+                   Liquid Chromatography - Mass spectrometry method (LC-MS/MS). Please use these files
                   with the header checkbox 'checked' in each of the two sections below."),
                               fluidRow(
                                 column(6,downloadButton('downloadData','1st test data')),
