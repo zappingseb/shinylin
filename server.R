@@ -245,7 +245,7 @@ analysis_generate = function(values,
         
         
         
-        data_out <- data.table(regression_combine_pretty(all_tables,all_titels))
+        data_out <- regression_combine_pretty(all_tables,all_titels)
         colnames(data_out)<- c('Linear regression Intercept',
                                               'Linear regression Slope',
                                               'Deming regression Intercept',
