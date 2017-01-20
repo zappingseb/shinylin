@@ -343,7 +343,7 @@ data_add_regression = function(the_data,
   x_reg <- seq(x_min,x_max,(x_max-x_min)/10)
 
   
-  bias <- data.frame(calcResponse(mcreg_model,alpha=0.02,x.levels = x_reg))
+  bias <- data.frame(calcResponse(mcreg_model,x.levels = x_reg))
 
   # Calculate y <- intercept + slope * x
   y_reg <- bias$Y
